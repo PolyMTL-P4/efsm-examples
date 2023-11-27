@@ -1,5 +1,7 @@
 # Flowlet Switching
 
+Example fully inspired by [p4-learning](https://github.com/nsg-ethz/p4-learning).
+
 ```
 
                           +--+
@@ -43,6 +45,15 @@ For more information about flowlet switching check out this [paper](https://www.
 
 ## How to run
 
+Compile first using the modified p4test.
+
+```bash
+cd p4src
+../../../p4c-f4/build/p4test --std f4 --efsm fb flowlet_switching.p4
+```
+
+Then copy table fill commands from `flowblaze-table-commands.txt` in s*-commands.txt
+
 Run the topology:
 
 ```bash
@@ -50,10 +61,10 @@ sudo p4run
 ```
 
 or
+
 ```bash
 sudo python network.py
 ```
-
 
 Monitor all the interfaces connecting `s1` to the 4 middle switches. You can use `tshark`, `tcpdump`:
 
@@ -70,4 +81,10 @@ belong to different flowlet they will be hashed to different output ports.
 ```bash
 mx h1
 python send.py 10.0.6.2 <num_packets> <sleep_between_packets>
+
+# will switch
+python send.py 10.0.6.2 100 0.15
+
+# wont switch
+python send.py 10.0.6.2 100 0.05
 ```
