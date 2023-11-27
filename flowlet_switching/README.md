@@ -48,11 +48,10 @@ For more information about flowlet switching check out this [paper](https://www.
 Compile first using the modified p4test.
 
 ```bash
-cd p4src
-../../../p4c-f4/build/p4test --std f4 --efsm fb flowlet_switching.p4
+../../p4c-f4/build/p4test --std f4 --efsm fb p4src/flowlet_switching.p4
 ```
 
-Then copy table fill commands from `flowblaze-table-commands.txt` in s*-commands.txt
+Then copy table fill commands from `flowblaze-table-commands.txt` in s*-commands.txt and rename IR file from `*.p4-IR.p4` to `*-IR.p4`.
 
 Run the topology:
 

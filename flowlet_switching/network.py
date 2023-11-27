@@ -13,7 +13,7 @@ net.addP4Switch('s3', cli_input='s3-commands.txt')
 net.addP4Switch('s4', cli_input='s4-commands.txt')
 net.addP4Switch('s5', cli_input='s5-commands.txt')
 net.addP4Switch('s6', cli_input='s6-commands.txt')
-net.setP4SourceAll('p4src/flowlet_switching.p4')
+net.setP4SourceAll('p4src/flowlet_switching-IR.p4')
 
 net.addHost('h1')
 net.addHost('h2')

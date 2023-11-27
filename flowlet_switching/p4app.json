@@ -1,5 +1,5 @@
 {
-  "p4_src": "p4src/flowlet_switching.p4-IR.p4",
+  "p4_src": "p4src/flowlet_switching-IR.p4",
   "cli": true,
   "pcap_dump": true,
   "enable_log": true,
