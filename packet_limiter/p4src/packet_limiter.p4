@@ -152,23 +152,6 @@ control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadat
         default_action = NoAction();
     }
 
-    /*direct_counter(CounterType.packets_and_bytes) l2_fwd_counter;
-    table t_l2_fwd {
-        key = {
-            standard_metadata.ingress_port : ternary;
-            hdr.ethernet.dstAddr           : ternary;
-            hdr.ethernet.srcAddr           : ternary;
-            hdr.ethernet.etherType         : ternary;
-        }
-        actions = {
-            main_forward;
-            main_drop;
-            NoAction;
-        }
-        default_action = NoAction();
-        counters = l2_fwd_counter;
-    }*/
-
     apply {
         if (hdr.ethernet.isValid()) {
             FlowBlaze.apply(hdr, meta, standard_metadata);
