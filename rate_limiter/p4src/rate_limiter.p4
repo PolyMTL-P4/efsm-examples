@@ -66,7 +66,7 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata_t meta, inou
 
     state parse_ipv4 {
         packet.extract(hdr.ipv4);
-        meta.tcpLength = hdr.ipv4.totalLen - 16w20;
+        meta.l4Length = hdr.ipv4.totalLen - 16w20;
         transition select(hdr.ipv4.protocol) {
             IP_TYPE_TCP:    parse_tcp;
             IP_TYPE_UDP:    parse_udp;
@@ -76,13 +76,11 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata_t meta, inou
 
     state parse_tcp {
         packet.extract(hdr.tcp);
-        meta.applLength = hdr.ipv4.totalLen - 16w40;
         transition accept;
     }
 
     state parse_udp {
         packet.extract(hdr.udp);
-        meta.applLength = meta.tcpLength - 16w28;
         transition accept;
     }
 
@@ -90,36 +88,37 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata_t meta, inou
 
 control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
 
-    // -------------------------------- TABLE L2 FWD -------------------------------------------
-    
-    action main_forward(bit<9> port) {
-      standard_metadata.egress_spec = port;
-    }
-
     action main_drop() {
       mark_to_drop(standard_metadata);
       exit;
     }
 
-    efsm packet_limiter() {
+    efsm rate_limiter() {
         state start {
-            pkt = 1;
+            rate = meta;
+            t_lim = now + 1000000;
             forward();
-            transition count;
+            transition open;
         }
 
-        state count {
-            pkt = pkt + 1;
+        state open {
+            rate = rate + meta;
             forward();
-            transition select (pkt < 10) {
-                true: count;
-                false: block;
+            transition select (t_lim >= now, rate <= 131072) {
+                (true, true): open;
+                (true, false): block;
+                (false, default): start;
             }
         }
 
         state block {
+            rate = meta;
+            t_lim = now + 1000000;
             drop();
-            transition block;
+            transition select (t_lim < now) {
+                true: open;
+                false: block;
+            }
         }
     }
 
@@ -220,7 +219,7 @@ control computeChecksum(inout headers hdr, inout metadata_t meta) {
               hdr.ipv4.dstAddr, 
               8w0, 
               hdr.ipv4.protocol, 
-              meta.tcpLength, 
+              meta.l4Length,
               hdr.tcp.srcPort, 
               hdr.tcp.dstPort, 
               hdr.tcp.seqNo, 
