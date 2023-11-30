@@ -46,19 +46,9 @@ or
 ```bash
 sudo python network.py
 ```
-
-Run the receiver and the sending scripts in `h2` and `h1` respectively:
-
-```bash
-mx h2
-python receive.py
-```
-
-Send 15 packets from `h1` to `h2`. Only the first 10 will be received.
+And test the bandwidth in mininet CLI with:
 
 ```bash
-mx h1
-python send.py 10.0.2.2 15
+iperf h1 h2
 ```
-
 
