@@ -22,10 +22,10 @@
 
 
 //My includes
-#include "flowblaze_lib/flowblaze_metadata.p4"
+#include "efsm_lib/flowblaze_metadata.p4"
 #include "include/headers.p4"
 #include "include/parsers.p4"
-#include "flowblaze_lib/flowblaze.p4"
+#include "efsm_lib/flowblaze.p4"
 
 /*************************************************************************
 ************   C H E C K S U M    V E R I F I C A T I O N   *************
@@ -46,32 +46,32 @@ control MyIngress(inout headers hdr,
 
     efsm flowlet_switching(in headers hdr,
                        in standard_metadata_t standard_metadata) {
-    state start {
-        flowlet_id = 0;
-        t_lim = now + 100000;
-        fill_meta_flowlet_id();
-        transition newpath;
-    }
+        state start {
+            flowlet_id = 0;
+            t_lim = now + 100000;
+            fill_meta_flowlet_id();
+            transition newpath;
+        }
 
-    state newpath {
-        flowlet_id = flowlet_id + 99;
-        fill_meta_flowlet_id();
-        t_lim = now + 100000;
-        transition select (t_lim < now) {
-            true : newpath;
-            false : samepath;
+        state newpath {
+            flowlet_id = flowlet_id + 99;
+            fill_meta_flowlet_id();
+            t_lim = now + 100000;
+            transition select (t_lim < now) {
+                true : newpath;
+                false : samepath;
+            }
+        }
+
+        state samepath {
+            fill_meta_flowlet_id();
+            t_lim = now + 100000;
+            transition select (t_lim < now) {
+                true: newpath;
+                false: samepath;
+            }
         }
     }
-
-    state samepath {
-        fill_meta_flowlet_id();
-        t_lim = now + 100000;
-        transition select (t_lim < now) {
-            true: newpath;
-            false: samepath;
-        }
-    }
-}
 
     action drop() {
         mark_to_drop(standard_metadata);
@@ -135,7 +135,9 @@ control MyIngress(inout headers hdr,
 
     apply {
         if (hdr.ipv4.isValid()) {
-            FlowBlaze.apply(hdr, meta, standard_metadata);
+            @atomic {
+                FlowBlaze.apply(hdr, meta, standard_metadata);
+            }
 
             switch (ipv4_lpm.apply().action_run){
                 ecmp_group: {

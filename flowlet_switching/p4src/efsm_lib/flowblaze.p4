@@ -314,10 +314,9 @@ control UpdateLogic(inout HEADER_NAME hdr,
     }
 }
 
-// ----------------------- UPDATE LOGIC BLOCK ----------------------------------
+// ----------------------- UPDATE STATE BLOCK ----------------------------------
 control UpdateState(inout HEADER_NAME hdr,
                     inout flowblaze_t flowblaze_metadata,
-                    inout flowblaze_single_update_t update_block,
                     in standard_metadata_t standard_metadata) {
 
     apply{
@@ -429,7 +428,8 @@ control FlowBlaze (inout HEADER_NAME hdr,
             meta.flowblaze_metadata.c3                   : ternary @name("FlowBlaze.condition3");
             #ifdef EFSM_MATCH_FIELDS
                 EFSM_MATCH_FIELDS
-            #endif        }
+            #endif
+        }
         default_action = NoAction;
         counters = transition_table_counter;
     }
@@ -584,8 +584,8 @@ control FlowBlaze (inout HEADER_NAME hdr,
         condition_block.apply(meta.flowblaze_metadata.condition_block.c_block_3, meta.flowblaze_metadata, standard_metadata, tmp_cnd);
         meta.flowblaze_metadata.c3 = tmp_cnd;
 
-        define_transition.apply();
-        update_state.apply();
+        transition_table.apply();
+        update_state.apply(hdr, meta.flowblaze_metadata, standard_metadata);
     }
 }
 #endif
