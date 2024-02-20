@@ -17,41 +17,21 @@ struct flowblaze_update_block_t {
     flowblaze_single_update_t u_block_2;
 }
 
-struct flowblaze_single_condition_t {
-    bit<3>  cond;
-    bit<8>  op1;
-    bit<8>  op2;
-    bit<32> operand1;
-    bit<32> operand2;
-}
-
-struct flowblaze_condition_block_t {
-    flowblaze_single_condition_t c_block_0;
-    flowblaze_single_condition_t c_block_1;
-    flowblaze_single_condition_t c_block_2;
-    flowblaze_single_condition_t c_block_3;
-}
-
 struct flowblaze_t {
-    bit<32>                     lookup_state_index;
-    bit<32>                     update_state_index;
-    bit<16>                     state;
-    bit<32>                     R0;
-    bit<32>                     R1;
-    bit<32>                     R2;
-    bit<32>                     R3;
-    bit<32>                     G0;
-    bit<32>                     G1;
-    bit<32>                     G2;
-    bit<32>                     G3;
-    bit<1>                      c0;
-    bit<1>                      c1;
-    bit<1>                      c2;
-    bit<1>                      c3;
-    bit<8>                      pkt_action;
-    bit<32>                     pkt_data;
-    flowblaze_update_block_t    update_block;
-    flowblaze_condition_block_t condition_block;
+    bit<32>                  lookup_state_index;
+    bit<32>                  update_state_index;
+    bit<16>                  state;
+    bit<32>                  R0;
+    bit<32>                  R1;
+    bit<32>                  R2;
+    bit<32>                  R3;
+    bit<32>                  G0;
+    bit<32>                  G1;
+    bit<32>                  G2;
+    bit<32>                  G3;
+    bit<8>                   pkt_action;
+    bit<32>                  pkt_data;
+    flowblaze_update_block_t update_block;
 }
 
 const bit<16> TYPE_IPV4 = 0x800;
@@ -155,89 +135,6 @@ register<bit<32>>(2014) reg_R1;
 register<bit<32>>(2014) reg_R2;
 register<bit<32>>(2014) reg_R3;
 register<bit<16>>(2014) reg_state;
-control ConditionBlock(inout flowblaze_single_condition_t meta_c_blk, inout flowblaze_t flowblaze_metadata, in standard_metadata_t standard_metadata, out bit<1> c) {
-    apply {
-        c = 0;
-        if (meta_c_blk.cond != 0b0) {
-            if (meta_c_blk.op1 == 0x0) {
-                meta_c_blk.operand1 = flowblaze_metadata.R0;
-            }
-            if (meta_c_blk.op1 == 0x1) {
-                meta_c_blk.operand1 = flowblaze_metadata.R1;
-            }
-            if (meta_c_blk.op1 == 0x2) {
-                meta_c_blk.operand1 = flowblaze_metadata.R2;
-            }
-            if (meta_c_blk.op1 == 0x3) {
-                meta_c_blk.operand1 = flowblaze_metadata.R3;
-            }
-            if (meta_c_blk.op1 == 0xf) {
-                meta_c_blk.operand1 = flowblaze_metadata.G0;
-            }
-            if (meta_c_blk.op1 == 0x1f) {
-                meta_c_blk.operand1 = flowblaze_metadata.G1;
-            }
-            if (meta_c_blk.op1 == 0x2f) {
-                meta_c_blk.operand1 = flowblaze_metadata.G2;
-            }
-            if (meta_c_blk.op1 == 0x3f) {
-                meta_c_blk.operand1 = flowblaze_metadata.G3;
-            }
-            if (meta_c_blk.op1 == 0xf1) {
-                meta_c_blk.operand1 = flowblaze_metadata.pkt_data;
-            }
-            if (meta_c_blk.op1 == 0xf2) {
-                meta_c_blk.operand1 = (bit<32>)standard_metadata.ingress_global_timestamp;
-            }
-            if (meta_c_blk.op2 == 0x0) {
-                meta_c_blk.operand2 = flowblaze_metadata.R0;
-            }
-            if (meta_c_blk.op2 == 0x1) {
-                meta_c_blk.operand2 = flowblaze_metadata.R1;
-            }
-            if (meta_c_blk.op2 == 0x2) {
-                meta_c_blk.operand2 = flowblaze_metadata.R2;
-            }
-            if (meta_c_blk.op2 == 0x3) {
-                meta_c_blk.operand2 = flowblaze_metadata.R3;
-            }
-            if (meta_c_blk.op2 == 0xf) {
-                meta_c_blk.operand2 = flowblaze_metadata.G0;
-            }
-            if (meta_c_blk.op2 == 0x1f) {
-                meta_c_blk.operand2 = flowblaze_metadata.G1;
-            }
-            if (meta_c_blk.op2 == 0x2f) {
-                meta_c_blk.operand2 = flowblaze_metadata.G2;
-            }
-            if (meta_c_blk.op2 == 0x3f) {
-                meta_c_blk.operand2 = flowblaze_metadata.G3;
-            }
-            if (meta_c_blk.op2 == 0xf1) {
-                meta_c_blk.operand2 = flowblaze_metadata.pkt_data;
-            }
-            if (meta_c_blk.op2 == 0xf2) {
-                meta_c_blk.operand2 = (bit<32>)standard_metadata.ingress_global_timestamp;
-            }
-            if (meta_c_blk.cond == 0b1) {
-                c = (bit<1>)(meta_c_blk.operand1 == meta_c_blk.operand2);
-            }
-            if (meta_c_blk.cond == 0b10) {
-                c = (bit<1>)(meta_c_blk.operand1 > meta_c_blk.operand2);
-            }
-            if (meta_c_blk.cond == 0b11) {
-                c = (bit<1>)(meta_c_blk.operand1 >= meta_c_blk.operand2);
-            }
-            if (meta_c_blk.cond == 0b100) {
-                c = (bit<1>)(meta_c_blk.operand1 < meta_c_blk.operand2);
-            }
-            if (meta_c_blk.cond == 0b101) {
-                c = (bit<1>)(meta_c_blk.operand1 <= meta_c_blk.operand2);
-            }
-        }
-    }
-}
-
 control UpdateLogic(inout headers hdr, inout flowblaze_t flowblaze_metadata, inout flowblaze_single_update_t update_block, in standard_metadata_t standard_metadata) {
     apply {
         hash(flowblaze_metadata.update_state_index, HashAlgorithm.crc32, (bit<32>)0, { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.tcp.srcPort, hdr.tcp.dstPort, hdr.ipv4.protocol }, (bit<32>)2014);
@@ -357,7 +254,29 @@ control UpdateLogic(inout headers hdr, inout flowblaze_t flowblaze_metadata, ino
 control UpdateState(inout headers hdr, inout flowblaze_t flowblaze_metadata, in standard_metadata_t standard_metadata) {
     apply {
         hash(flowblaze_metadata.update_state_index, HashAlgorithm.crc32, (bit<32>)0, { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.tcp.srcPort, hdr.tcp.dstPort, hdr.ipv4.protocol }, (bit<32>)2014);
-        reg_state.write(flowblaze_metadata.update_state_index, flowblaze_metadata.state);
+        if (flowblaze_metadata.state == 0) {
+            reg_state.write(flowblaze_metadata.update_state_index, (bit<16>)1);
+        }
+        if (flowblaze_metadata.state == 1) {
+            if (flowblaze_metadata.R1 < (bit<32>)standard_metadata.ingress_global_timestamp) {
+                reg_state.write(flowblaze_metadata.update_state_index, (bit<16>)1);
+            }
+        }
+        if (flowblaze_metadata.state == 1) {
+            if (flowblaze_metadata.R1 >= (bit<32>)standard_metadata.ingress_global_timestamp) {
+                reg_state.write(flowblaze_metadata.update_state_index, (bit<16>)2);
+            }
+        }
+        if (flowblaze_metadata.state == 2) {
+            if (flowblaze_metadata.R1 < (bit<32>)standard_metadata.ingress_global_timestamp) {
+                reg_state.write(flowblaze_metadata.update_state_index, (bit<16>)1);
+            }
+        }
+        if (flowblaze_metadata.state == 2) {
+            if (flowblaze_metadata.R1 >= (bit<32>)standard_metadata.ingress_global_timestamp) {
+                reg_state.write(flowblaze_metadata.update_state_index, (bit<16>)2);
+            }
+        }
     }
 }
 
@@ -395,25 +314,6 @@ control FlowBlaze(inout headers hdr, inout metadata meta, inout standard_metadat
         default_action = NoAction;
         counters = EFSM_table_counter;
     }
-    @name(".FlowBlaze.define_transition") action define_transition(bit<16> state) {
-        meta.flowblaze_metadata.state = state;
-    }
-    @name(".FlowBlaze.transition_table_counter") direct_counter(CounterType.packets_and_bytes) transition_table_counter;
-    @name(".FlowBlaze.transition_table") table transition_table {
-        actions = {
-            define_transition;
-            NoAction;
-        }
-        key = {
-            meta.flowblaze_metadata.state: ternary @name("FlowBlaze.state");
-            meta.flowblaze_metadata.c0   : ternary @name("FlowBlaze.condition0");
-            meta.flowblaze_metadata.c1   : ternary @name("FlowBlaze.condition1");
-            meta.flowblaze_metadata.c2   : ternary @name("FlowBlaze.condition2");
-            meta.flowblaze_metadata.c3   : ternary @name("FlowBlaze.condition3");
-        }
-        default_action = NoAction;
-        counters = transition_table_counter;
-    }
     @name(".FlowBlaze.lookup_context_table") action lookup_context_table() {
         hash(meta.flowblaze_metadata.lookup_state_index, HashAlgorithm.crc32, (bit<32>)0, { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.tcp.srcPort, hdr.tcp.dstPort, hdr.ipv4.protocol }, (bit<32>)2014);
         reg_state.read(meta.flowblaze_metadata.state, meta.flowblaze_metadata.lookup_state_index);
@@ -435,37 +335,6 @@ control FlowBlaze(inout headers hdr, inout metadata meta, inout standard_metadat
         default_action = lookup_context_table();
         counters = context_lookup_counter;
     }
-    @name(".FlowBlaze.set_condition_fields") action set_condition_fields(bit<3> cond0, bit<8> op1_0, bit<8> op2_0, bit<32> operand1_0, bit<32> operand2_0, bit<3> cond1, bit<8> op1_1, bit<8> op2_1, bit<32> operand1_1, bit<32> operand2_1, bit<3> cond2, bit<8> op1_2, bit<8> op2_2, bit<32> operand1_2, bit<32> operand2_2, bit<3> cond3, bit<8> op1_3, bit<8> op2_3, bit<32> operand1_3, bit<32> operand2_3) {
-        meta.flowblaze_metadata.condition_block.c_block_0.cond = cond0;
-        meta.flowblaze_metadata.condition_block.c_block_0.op1 = op1_0;
-        meta.flowblaze_metadata.condition_block.c_block_0.op2 = op2_0;
-        meta.flowblaze_metadata.condition_block.c_block_0.operand1 = operand1_0;
-        meta.flowblaze_metadata.condition_block.c_block_0.operand2 = operand2_0;
-        meta.flowblaze_metadata.condition_block.c_block_1.cond = cond1;
-        meta.flowblaze_metadata.condition_block.c_block_1.op1 = op1_1;
-        meta.flowblaze_metadata.condition_block.c_block_1.op2 = op2_1;
-        meta.flowblaze_metadata.condition_block.c_block_1.operand1 = operand1_1;
-        meta.flowblaze_metadata.condition_block.c_block_1.operand2 = operand2_1;
-        meta.flowblaze_metadata.condition_block.c_block_2.cond = cond2;
-        meta.flowblaze_metadata.condition_block.c_block_2.op1 = op1_2;
-        meta.flowblaze_metadata.condition_block.c_block_2.op2 = op2_2;
-        meta.flowblaze_metadata.condition_block.c_block_2.operand1 = operand1_2;
-        meta.flowblaze_metadata.condition_block.c_block_2.operand2 = operand2_2;
-        meta.flowblaze_metadata.condition_block.c_block_3.cond = cond3;
-        meta.flowblaze_metadata.condition_block.c_block_3.op1 = op1_3;
-        meta.flowblaze_metadata.condition_block.c_block_3.op2 = op2_3;
-        meta.flowblaze_metadata.condition_block.c_block_3.operand1 = operand1_3;
-        meta.flowblaze_metadata.condition_block.c_block_3.operand2 = operand2_3;
-    }
-    @name(".FlowBlaze.condition_table_counter") direct_counter(CounterType.packets_and_bytes) condition_table_counter;
-    @name(".FlowBlaze.condition_table") table condition_table {
-        actions = {
-            set_condition_fields;
-            NoAction;
-        }
-        default_action = NoAction;
-        counters = condition_table_counter;
-    }
     @name(".FlowBlaze.forward") action forward() {
     }
     @name(".FlowBlaze.fill_meta_flowlet_id") action fill_meta_flowlet_id() {
@@ -486,7 +355,6 @@ control FlowBlaze(inout headers hdr, inout metadata meta, inout standard_metadat
     }
     UpdateLogic() update_logic;
     UpdateState() update_state;
-    ConditionBlock() condition_block;
     apply {
         context_lookup.apply();
         EFSM_table.apply();
@@ -494,17 +362,6 @@ control FlowBlaze(inout headers hdr, inout metadata meta, inout standard_metadat
         update_logic.apply(hdr, meta.flowblaze_metadata, meta.flowblaze_metadata.update_block.u_block_1, standard_metadata);
         update_logic.apply(hdr, meta.flowblaze_metadata, meta.flowblaze_metadata.update_block.u_block_2, standard_metadata);
         pkt_action.apply();
-        condition_table.apply();
-        bit<1> tmp_cnd;
-        condition_block.apply(meta.flowblaze_metadata.condition_block.c_block_0, meta.flowblaze_metadata, standard_metadata, tmp_cnd);
-        meta.flowblaze_metadata.c0 = tmp_cnd;
-        condition_block.apply(meta.flowblaze_metadata.condition_block.c_block_1, meta.flowblaze_metadata, standard_metadata, tmp_cnd);
-        meta.flowblaze_metadata.c1 = tmp_cnd;
-        condition_block.apply(meta.flowblaze_metadata.condition_block.c_block_2, meta.flowblaze_metadata, standard_metadata, tmp_cnd);
-        meta.flowblaze_metadata.c2 = tmp_cnd;
-        condition_block.apply(meta.flowblaze_metadata.condition_block.c_block_3, meta.flowblaze_metadata, standard_metadata, tmp_cnd);
-        meta.flowblaze_metadata.c3 = tmp_cnd;
-        transition_table.apply();
         update_state.apply(hdr, meta.flowblaze_metadata, standard_metadata);
     }
 }

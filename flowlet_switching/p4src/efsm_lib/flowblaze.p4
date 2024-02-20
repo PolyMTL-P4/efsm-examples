@@ -69,105 +69,6 @@ register<bit<32>>(CONTEXT_TABLE_SIZE) reg_R3;
 // Register that stores the state of the flows
 register<bit<16>>(CONTEXT_TABLE_SIZE) reg_state;
 
-control ConditionBlock(inout flowblaze_single_condition_t meta_c_blk,
-                       inout flowblaze_t flowblaze_metadata,
-                       in standard_metadata_t standard_metadata,
-                       out bit<1> c) {
-    apply {
-        c = 0;
-        if(meta_c_blk.cond != NO_CONDITION){
-            // Set operand 1
-            if(meta_c_blk.op1 == _R0) {
-                meta_c_blk.operand1 = flowblaze_metadata.R0;
-            }
-            if(meta_c_blk.op1 == _R1) {
-                meta_c_blk.operand1 = flowblaze_metadata.R1;
-            }
-            if(meta_c_blk.op1 == _R2) {
-                meta_c_blk.operand1 = flowblaze_metadata.R2;
-            }
-            if(meta_c_blk.op1 == _R3) {
-                meta_c_blk.operand1 = flowblaze_metadata.R3;
-            }
-            if(meta_c_blk.op1 == _G0) {
-                meta_c_blk.operand1 = flowblaze_metadata.G0;
-            }
-            if(meta_c_blk.op1 == _G1) {
-                meta_c_blk.operand1 = flowblaze_metadata.G1;
-            }
-            if(meta_c_blk.op1 == _G2) {
-                meta_c_blk.operand1 = flowblaze_metadata.G2;
-            }
-            if(meta_c_blk.op1 == _G3) {
-                meta_c_blk.operand1 = flowblaze_metadata.G3;
-            }
-            if(meta_c_blk.op1 == _META) {
-                meta_c_blk.operand1 = flowblaze_metadata.pkt_data;
-            }
-            if(meta_c_blk.op1 == _TIME_NOW) {
-                meta_c_blk.operand1 = (bit<32>) standard_metadata.ingress_global_timestamp;
-            }
-            // EXPLICIT IS THE DEFAULT BEHAVIOUR
-            //if(meta_c_blk.op1 == _EXPL) {
-            //    meta_c_blk.operand1 = meta_c_blk.operand1
-            //}
-
-            // Set operand 2
-            if(meta_c_blk.op2 == _R0) {
-                meta_c_blk.operand2 = flowblaze_metadata.R0;
-            }
-            if(meta_c_blk.op2 == _R1) {
-                meta_c_blk.operand2 = flowblaze_metadata.R1;
-            }
-            if(meta_c_blk.op2 == _R2) {
-                meta_c_blk.operand2 = flowblaze_metadata.R2;
-            }
-            if(meta_c_blk.op2 == _R3) {
-                meta_c_blk.operand2 = flowblaze_metadata.R3;
-            }
-            if(meta_c_blk.op2 == _G0) {
-                meta_c_blk.operand2 = flowblaze_metadata.G0;
-            }
-            if(meta_c_blk.op2 == _G1) {
-                meta_c_blk.operand2 = flowblaze_metadata.G1;
-            }
-            if(meta_c_blk.op2 == _G2) {
-                meta_c_blk.operand2 = flowblaze_metadata.G2;
-            }
-            if(meta_c_blk.op2 == _G3) {
-                meta_c_blk.operand2 = flowblaze_metadata.G3;
-            }
-            if(meta_c_blk.op2 == _META) {
-                meta_c_blk.operand2 = flowblaze_metadata.pkt_data;
-            }
-            if(meta_c_blk.op2 == _TIME_NOW) {
-                meta_c_blk.operand2 = (bit<32>) standard_metadata.ingress_global_timestamp;
-            }
-            // EXPLICIT IS THE DEFAULT BEHAVIOUR
-            //if(meta_c_blk.op2 == _EXPL) {
-            //    meta_c_blk.operand1 = meta_c_blk.operand2
-            //}
-
-            if(meta_c_blk.cond == CONDITION_EQ) {
-                c = (bit<1>) ( meta_c_blk.operand1 == meta_c_blk.operand2);
-            }
-            if(meta_c_blk.cond == CONDITION_GT) {
-                c = (bit<1>) ( meta_c_blk.operand1 > meta_c_blk.operand2);
-            }
-            if(meta_c_blk.cond == CONDITION_GTE) {
-                c = (bit<1>) ( meta_c_blk.operand1 >= meta_c_blk.operand2);
-            }
-            if(meta_c_blk.cond == CONDITION_LT) {
-                c = (bit<1>) ( meta_c_blk.operand1 < meta_c_blk.operand2);
-            }
-            if(meta_c_blk.cond == CONDITION_LTE) {
-                c = (bit<1>) ( meta_c_blk.operand1 <= meta_c_blk.operand2);
-            }
-        }
-    }
-
-}
-
 
 // ----------------------- UPDATE LOGIC BLOCK ----------------------------------
 control UpdateLogic(inout HEADER_NAME hdr,
@@ -327,13 +228,40 @@ control UpdateState(inout HEADER_NAME hdr,
              (bit<32>) 0,
              FLOW_SCOPE,
              (bit<32>) CONTEXT_TABLE_SIZE);
-        // Update state using the update lookup index
-        reg_state.write(flowblaze_metadata.update_state_index, flowblaze_metadata.state);
-
-        // Check if an operation is requested and then extract operands and operation
-        
+        if (flowblaze_metadata.state == 0) {
+        reg_state.write(flowblaze_metadata.update_state_index, (bit<16>)1);
+        }
+        if (flowblaze_metadata.state == 1) {
+        if (flowblaze_metadata.R1<(bit<32>)standard_metadata.ingress_global_timestamp) {
+                reg_state.write(flowblaze_metadata.update_state_index, (bit<16>)1);
+            }
+        }
+        if (flowblaze_metadata.state == 1) {
+        if (flowblaze_metadata.R1>=(bit<32>)standard_metadata.ingress_global_timestamp) {
+                reg_state.write(flowblaze_metadata.update_state_index, (bit<16>)2);
+            }
+        }
+        if (flowblaze_metadata.state == 2) {
+        if (flowblaze_metadata.R1<(bit<32>)standard_metadata.ingress_global_timestamp) {
+                reg_state.write(flowblaze_metadata.update_state_index, (bit<16>)1);
+            }
+        }
+        if (flowblaze_metadata.state == 2) {
+        if (flowblaze_metadata.R1>=(bit<32>)standard_metadata.ingress_global_timestamp) {
+                reg_state.write(flowblaze_metadata.update_state_index, (bit<16>)2);
+            }
+        }
     }
 }
+
+
+
+
+
+
+
+
+
 // ------------------------------------------------------------------------------------
 
 control FlowBlaze (inout HEADER_NAME hdr,
@@ -406,34 +334,6 @@ control FlowBlaze (inout HEADER_NAME hdr,
         counters = EFSM_table_counter;
     }
 
-@name(".FlowBlaze.define_transition")
-    action define_transition(bit<16> state) {
-        // Update the state
-        meta.flowblaze_metadata.state = state;
-    }
-
-    @name(".FlowBlaze.transition_table_counter")
-    direct_counter(CounterType.packets_and_bytes) transition_table_counter;
-    @name(".FlowBlaze.transition_table")
-    table transition_table {
-        actions = {
-            define_transition;
-            NoAction;
-        }
-        key = {
-            meta.flowblaze_metadata.state                : ternary @name("FlowBlaze.state");
-            meta.flowblaze_metadata.c0                   : ternary @name("FlowBlaze.condition0");
-            meta.flowblaze_metadata.c1                   : ternary @name("FlowBlaze.condition1");
-            meta.flowblaze_metadata.c2                   : ternary @name("FlowBlaze.condition2");
-            meta.flowblaze_metadata.c3                   : ternary @name("FlowBlaze.condition3");
-            #ifdef EFSM_MATCH_FIELDS
-                EFSM_MATCH_FIELDS
-            #endif
-        }
-        default_action = NoAction;
-        counters = transition_table_counter;
-    }
-
 
     // ------------------------------------------------------------------------
 
@@ -475,62 +375,6 @@ control FlowBlaze (inout HEADER_NAME hdr,
     // --------------------------------------------------------------------------
 
 
-    // -------------------------------- CONDITION TABLE -------------------------
-    @name(".FlowBlaze.set_condition_fields")
-    action set_condition_fields(bit<3> cond0,
-                                bit<8> op1_0,
-                                bit<8> op2_0,
-                                bit<32> operand1_0,
-                                bit<32> operand2_0,
-                                bit<3> cond1,
-                                bit<8> op1_1,
-                                bit<8> op2_1,
-                                bit<32> operand1_1,
-                                bit<32> operand2_1,
-                                bit<3> cond2,
-                                bit<8> op1_2,
-                                bit<8> op2_2,
-                                bit<32> operand1_2,
-                                bit<32> operand2_2,
-                                bit<3> cond3,
-                                bit<8> op1_3,
-                                bit<8> op2_3,
-                                bit<32> operand1_3,
-                                bit<32> operand2_3) {
-        meta.flowblaze_metadata.condition_block.c_block_0.cond = cond0;
-        meta.flowblaze_metadata.condition_block.c_block_0.op1 = op1_0;
-        meta.flowblaze_metadata.condition_block.c_block_0.op2 = op2_0;
-        meta.flowblaze_metadata.condition_block.c_block_0.operand1 = operand1_0;
-        meta.flowblaze_metadata.condition_block.c_block_0.operand2 = operand2_0;
-        meta.flowblaze_metadata.condition_block.c_block_1.cond = cond1;
-        meta.flowblaze_metadata.condition_block.c_block_1.op1 = op1_1;
-        meta.flowblaze_metadata.condition_block.c_block_1.op2 = op2_1;
-        meta.flowblaze_metadata.condition_block.c_block_1.operand1 = operand1_1;
-        meta.flowblaze_metadata.condition_block.c_block_1.operand2 = operand2_1;
-        meta.flowblaze_metadata.condition_block.c_block_2.cond = cond2;
-        meta.flowblaze_metadata.condition_block.c_block_2.op1 = op1_2;
-        meta.flowblaze_metadata.condition_block.c_block_2.op2 = op2_2;
-        meta.flowblaze_metadata.condition_block.c_block_2.operand1 = operand1_2;
-        meta.flowblaze_metadata.condition_block.c_block_2.operand2 = operand2_2;
-        meta.flowblaze_metadata.condition_block.c_block_3.cond = cond3;
-        meta.flowblaze_metadata.condition_block.c_block_3.op1 = op1_3;
-        meta.flowblaze_metadata.condition_block.c_block_3.op2 = op2_3;
-        meta.flowblaze_metadata.condition_block.c_block_3.operand1 = operand1_3;
-        meta.flowblaze_metadata.condition_block.c_block_3.operand2 = operand2_3;
-    }
-
-    @name(".FlowBlaze.condition_table_counter")
-    direct_counter(CounterType.packets_and_bytes) condition_table_counter;
-    @name(".FlowBlaze.condition_table")
-    table condition_table {
-        actions = {
-            set_condition_fields;
-            NoAction;
-        }
-        default_action = NoAction;
-        counters = condition_table_counter;
-    }
-
     #ifdef CUSTOM_ACTIONS_DEFINITION
         CUSTOM_ACTIONS_DEFINITION
     #endif
@@ -558,7 +402,6 @@ control FlowBlaze (inout HEADER_NAME hdr,
 
     UpdateLogic() update_logic;
     UpdateState() update_state;
-    ConditionBlock() condition_block;
     apply {
         #ifdef METADATA_OPERATION_COND
             // FIXME: is cast really necessary?
@@ -573,18 +416,6 @@ control FlowBlaze (inout HEADER_NAME hdr,
         update_logic.apply(hdr, meta.flowblaze_metadata, meta.flowblaze_metadata.update_block.u_block_2, standard_metadata);
         pkt_action.apply();
 
-        condition_table.apply();
-        bit<1> tmp_cnd;
-        condition_block.apply(meta.flowblaze_metadata.condition_block.c_block_0, meta.flowblaze_metadata, standard_metadata, tmp_cnd);
-        meta.flowblaze_metadata.c0 = tmp_cnd;
-        condition_block.apply(meta.flowblaze_metadata.condition_block.c_block_1, meta.flowblaze_metadata, standard_metadata, tmp_cnd);
-        meta.flowblaze_metadata.c1 = tmp_cnd;
-        condition_block.apply(meta.flowblaze_metadata.condition_block.c_block_2, meta.flowblaze_metadata, standard_metadata, tmp_cnd);
-        meta.flowblaze_metadata.c2 = tmp_cnd;
-        condition_block.apply(meta.flowblaze_metadata.condition_block.c_block_3, meta.flowblaze_metadata, standard_metadata, tmp_cnd);
-        meta.flowblaze_metadata.c3 = tmp_cnd;
-
-        transition_table.apply();
         update_state.apply(hdr, meta.flowblaze_metadata, standard_metadata);
     }
 }
