@@ -20,21 +20,6 @@
 
 # This file contains the custom metadata needed for FlowBlaze to work
 
-struct flowblaze_single_update_t {
-    bit<8>  operation;
-    bit<8>  result;
-    bit<8>  op1;
-    bit<8>  op2;
-    bit<32> operand1;
-    bit<32> operand2;
-}
-
-struct flowblaze_update_block_t {
-    flowblaze_single_update_t u_block_0;
-    flowblaze_single_update_t u_block_1;
-    flowblaze_single_update_t u_block_2;
-}
-
 struct flowblaze_t {
     bit<32> lookup_state_index;
     bit<32> update_state_index;
@@ -49,7 +34,6 @@ struct flowblaze_t {
     bit<32> G3;
     bit<8>  pkt_action;
     bit<32> pkt_data; // Data related to packet header or metadata that can be used as operand in an operation
-    flowblaze_update_block_t update_block;
 }
 
 #endif

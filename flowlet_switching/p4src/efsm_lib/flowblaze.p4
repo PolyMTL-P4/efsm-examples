@@ -73,7 +73,6 @@ register<bit<16>>(CONTEXT_TABLE_SIZE) reg_state;
 // ----------------------- UPDATE LOGIC BLOCK ----------------------------------
 control UpdateLogic(inout HEADER_NAME hdr,
                     inout flowblaze_t flowblaze_metadata,
-                    inout flowblaze_single_update_t update_block,
                     in standard_metadata_t standard_metadata) {
 
     apply{
@@ -85,135 +84,27 @@ control UpdateLogic(inout HEADER_NAME hdr,
              FLOW_SCOPE,
              (bit<32>) CONTEXT_TABLE_SIZE);
 
-        // Check if an operation is requested and then extract operands and operation
-        if(update_block.operation != _NO_OP){
-            // Set the operand 1
-            if(update_block.op1 == _R0) {
-                update_block.operand1 = flowblaze_metadata.R0;
-            }
-            if(update_block.op1 == _R1) {
-                update_block.operand1 = flowblaze_metadata.R1;
-            }
-            if(update_block.op1 == _R2) {
-                update_block.operand1 = flowblaze_metadata.R2;
-            }
-            if(update_block.op1 == _R3) {
-                update_block.operand1 = flowblaze_metadata.R3;
-            }
-            if(update_block.op1 == _G0) {
-                update_block.operand1 = flowblaze_metadata.G0;
-            }
-            if(update_block.op1 == _G1) {
-                update_block.operand1 = flowblaze_metadata.G1;
-            }
-            if(update_block.op1 == _G2) {
-                update_block.operand1 = flowblaze_metadata.G2;
-            }
-            if(update_block.op1 == _G3) {
-                update_block.operand1 = flowblaze_metadata.G3;
-            }
-            if(update_block.op1 == _META) {
-                update_block.operand1 = flowblaze_metadata.pkt_data;
-            }
-            if(update_block.op1 == _TIME_NOW) {
-                update_block.operand1 = (bit<32>) standard_metadata.ingress_global_timestamp;
-            }
-            // EXPLICIT IS THE DEFAULT BEHAVIOUR
-            //if(flowblaze_metadata.op1 == _EXPL) {
-            //    flowblaze_metadata.operand1 = flowblaze_metadata.operand1
-            //}
-
-            // Set the operand 2
-            if(update_block.op2 == _R0) {
-               update_block.operand2 = flowblaze_metadata.R0;
-            }
-            if(update_block.op2 == _R1) {
-                update_block.operand2 = flowblaze_metadata.R1;
-            }
-            if(update_block.op2 == _R2) {
-                update_block.operand2 = flowblaze_metadata.R2;
-            }
-            if(update_block.op2 == _R3) {
-                update_block.operand2 = flowblaze_metadata.R3;
-            }
-            if(update_block.op2 == _G0) {
-                update_block.operand2 = flowblaze_metadata.G0;
-            }
-            if(update_block.op2 == _G1) {
-                update_block.operand2 = flowblaze_metadata.G1;
-            }
-            if(update_block.op2 == _G2) {
-                update_block.operand2 = flowblaze_metadata.G2;
-            }
-            if(update_block.op2 == _G3) {
-                update_block.operand2 = flowblaze_metadata.G3;
-            }
-            if(update_block.op2 == _META) {
-                update_block.operand2 = flowblaze_metadata.pkt_data;
-            }
-             if(update_block.op2 == _TIME_NOW) {
-                update_block.operand2 = (bit<32>) standard_metadata.ingress_global_timestamp;
-            }
-            // EXPLICIT IS THE DEFAULT BEHAVIOUR
-            //if(flowblaze_metadata.op2 == _EXPL) {
-            //    flowblaze_metadata.operand2 = flowblaze_metadata.operand2
-            //}
-
-            // Do the actual operation
-            bit<32> t_result = 0;
-            bit<1> op_done= 0b0;
-            if(update_block.operation == _PLUS) {
-                t_result = update_block.operand1 + update_block.operand2;
-                op_done = 0b1;
-            }
-            if(update_block.operation == _MINUS) {
-                t_result = update_block.operand1 - update_block.operand2;
-                op_done = 0b1;
-            }
-            if(update_block.operation == _R_SHIFT) {
-                t_result = update_block.operand1 >> (bit<8>) update_block.operand2;
-                op_done = 0b1;
-            }
-            if(update_block.operation == _L_SHIFT) {
-                t_result = update_block.operand1 << (bit<8>) update_block.operand2;
-                op_done = 0b1;
-            }
-            if(update_block.operation == _MUL) {
-                t_result = update_block.operand1 * update_block.operand2;
-                op_done = 0b1;
-            }
-
-            // Update the result on the correct register
-            if (op_done == 0b1){
-                if(update_block.result == _R0) {
-                    reg_R0.write(flowblaze_metadata.update_state_index, t_result);
-                }
-                if(update_block.result == _R1) {
-                    reg_R1.write(flowblaze_metadata.update_state_index, t_result);
-                }
-                if(update_block.result == _R2) {
-                    reg_R2.write(flowblaze_metadata.update_state_index, t_result);
-                }
-                if(update_block.result == _R3) {
-                    reg_R3.write(flowblaze_metadata.update_state_index, t_result);
-                }
-
-                if(update_block.result == _G0) {
-                    reg_G.write(0, t_result);
-                }
-                if(update_block.result == _G1) {
-                    reg_G.write(1, t_result);
-                }
-                if(update_block.result == _G2) {
-                    reg_G.write(2, t_result);
-                }
-                if(update_block.result == _G3) {
-                    reg_G.write(3, t_result);
-                }
-            }
+        bit<32> t_result = 0;
+        if (flowblaze_metadata.state == 0) {
+            t_result = 0 + 0;
+            reg_R0.write(flowblaze_metadata.update_state_index, t_result);
+            t_result = (bit<32>)standard_metadata.ingress_global_timestamp + 100000;
+            reg_R1.write(flowblaze_metadata.update_state_index, t_result);
         }
+        if (flowblaze_metadata.state == 1) {
+            t_result = flowblaze_metadata.R0 + 99;
+            reg_R0.write(flowblaze_metadata.update_state_index, t_result);
+            t_result = (bit<32>)standard_metadata.ingress_global_timestamp + 100000;
+            reg_R1.write(flowblaze_metadata.update_state_index, t_result);
+        }
+        if (flowblaze_metadata.state == 2) {
+            t_result = (bit<32>)standard_metadata.ingress_global_timestamp + 100000;
+            reg_R1.write(flowblaze_metadata.update_state_index, t_result);
+        }
+
     }
 }
+
 
 // ----------------------- UPDATE STATE BLOCK ----------------------------------
 control UpdateState(inout HEADER_NAME hdr,
@@ -269,54 +160,13 @@ control FlowBlaze (inout HEADER_NAME hdr,
                  inout standard_metadata_t standard_metadata){
     // ------------------------ EFSM TABLE -----------------------------
     @name(".FlowBlaze.define_operation_update_state")
-    action define_operation_update_state(bit<8> operation_0,
-                                         bit<8> result_0,
-                                         bit<8> op1_0,
-                                         bit<8> op2_0,
-                                         bit<32> operand1_0,
-                                         bit<32> operand2_0,
-                                         bit<8> operation_1,
-                                         bit<8> result_1,
-                                         bit<8> op1_1,
-                                         bit<8> op2_1,
-                                         bit<32> operand1_1,
-                                         bit<32> operand2_1,
-                                         bit<8> operation_2,
-                                         bit<8> result_2,
-                                         bit<8> op1_2,
-                                         bit<8> op2_2,
-                                         bit<32> operand1_2,
-                                         bit<32> operand2_2,
+    action define_operation_update_state(
                                          bit<8> pkt_action
                                          ) {
 
         // Set the packet action to be applied by the main P4 Program,
         //   in this way the user can define arbitrary action to be applied to packet.
         meta.flowblaze_metadata.pkt_action = pkt_action;
-
-        // Set operation 1: result = operation(op1, op2)
-        meta.flowblaze_metadata.update_block.u_block_0.operation = operation_0;
-        meta.flowblaze_metadata.update_block.u_block_0.result = result_0;
-        meta.flowblaze_metadata.update_block.u_block_0.op1 = op1_0;
-        meta.flowblaze_metadata.update_block.u_block_0.op2 = op2_0;
-        meta.flowblaze_metadata.update_block.u_block_0.operand1 = operand1_0;
-        meta.flowblaze_metadata.update_block.u_block_0.operand2 = operand2_0;
-
-        // Set operation 2: result = operation(op1, op2)
-        meta.flowblaze_metadata.update_block.u_block_1.operation = operation_1;
-        meta.flowblaze_metadata.update_block.u_block_1.result = result_1;
-        meta.flowblaze_metadata.update_block.u_block_1.op1 = op1_1;
-        meta.flowblaze_metadata.update_block.u_block_1.op2 = op2_1;
-        meta.flowblaze_metadata.update_block.u_block_1.operand1 = operand1_1;
-        meta.flowblaze_metadata.update_block.u_block_1.operand2 = operand2_1;
-
-        // Set operation 3: result = operation(op1, op2)
-        meta.flowblaze_metadata.update_block.u_block_2.operation = operation_2;
-        meta.flowblaze_metadata.update_block.u_block_2.result = result_2;
-        meta.flowblaze_metadata.update_block.u_block_2.op1 = op1_2;
-        meta.flowblaze_metadata.update_block.u_block_2.op2 = op2_2;
-        meta.flowblaze_metadata.update_block.u_block_2.operand1 = operand1_2;
-        meta.flowblaze_metadata.update_block.u_block_2.operand2 = operand2_2;
     }
 
     @name(".FlowBlaze.EFSM_table_counter")
@@ -411,9 +261,7 @@ control FlowBlaze (inout HEADER_NAME hdr,
         context_lookup.apply();
 
         EFSM_table.apply();
-        update_logic.apply(hdr, meta.flowblaze_metadata, meta.flowblaze_metadata.update_block.u_block_0, standard_metadata);
-        update_logic.apply(hdr, meta.flowblaze_metadata, meta.flowblaze_metadata.update_block.u_block_1, standard_metadata);
-        update_logic.apply(hdr, meta.flowblaze_metadata, meta.flowblaze_metadata.update_block.u_block_2, standard_metadata);
+        update_logic.apply(hdr, meta.flowblaze_metadata, standard_metadata);
         pkt_action.apply();
 
         update_state.apply(hdr, meta.flowblaze_metadata, standard_metadata);

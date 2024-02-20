@@ -1,6 +1,6 @@
 table_add FlowBlaze.pkt_action fill_meta_flowlet_id 0x1&&&0xFF => 10
 
-table_add FlowBlaze.EFSM_table define_operation_update_state 0&&&0xFFFF  => 0x1 0x0 0xff 0xff 0 0 0x1 0x1 0xf2 0xff 0 100000 0x0 0 0 0 0 0 1 1
-table_add FlowBlaze.EFSM_table define_operation_update_state 1&&&0xFFFF  => 0x1 0x0 0x0 0xff 0 99 0x1 0x1 0xf2 0xff 0 100000 0x0 0 0 0 0 0 1 1
-table_add FlowBlaze.EFSM_table define_operation_update_state 2&&&0xFFFF  => 0x1 0x1 0xf2 0xff 0 100000 0x0 0 0 0 0 0 0x0 0 0 0 0 0 1 1
+table_add FlowBlaze.EFSM_table define_operation_update_state 0&&&0xFFFF  => 1 1
+table_add FlowBlaze.EFSM_table define_operation_update_state 1&&&0xFFFF  => 1 1
+table_add FlowBlaze.EFSM_table define_operation_update_state 2&&&0xFFFF  => 1 1
 
