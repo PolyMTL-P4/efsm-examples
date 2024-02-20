@@ -14,7 +14,6 @@ struct flowblaze_t {
     bit<32> G1;
     bit<32> G2;
     bit<32> G3;
-    bit<8>  pkt_action;
     bit<32> pkt_data;
 }
 
@@ -172,13 +171,16 @@ control UpdateState(inout headers hdr, inout flowblaze_t flowblaze_metadata, in 
 }
 
 control FlowBlaze(inout headers hdr, inout metadata meta, inout standard_metadata_t standard_metadata) {
-    @name(".FlowBlaze.define_operation_update_state") action define_operation_update_state(bit<8> pkt_action) {
-        meta.flowblaze_metadata.pkt_action = pkt_action;
+    @name(".FlowBlaze.forward") action forward() {
+    }
+    @name(".FlowBlaze.fill_meta_flowlet_id") action fill_meta_flowlet_id() {
+        meta.flowlet_id = (bit<16>)meta.flowblaze_metadata.R0;
     }
     @name(".FlowBlaze.EFSM_table_counter") direct_counter(CounterType.packets_and_bytes) EFSM_table_counter;
     @name(".FlowBlaze.EFSM_table") table EFSM_table {
         actions = {
-            define_operation_update_state;
+            forward;
+            fill_meta_flowlet_id;
             NoAction;
         }
         key = {
@@ -208,31 +210,12 @@ control FlowBlaze(inout headers hdr, inout metadata meta, inout standard_metadat
         default_action = lookup_context_table();
         counters = context_lookup_counter;
     }
-    @name(".FlowBlaze.forward") action forward() {
-    }
-    @name(".FlowBlaze.fill_meta_flowlet_id") action fill_meta_flowlet_id() {
-        meta.flowlet_id = (bit<16>)meta.flowblaze_metadata.R0;
-    }
-    @name(".FlowBlaze.pkt_action_counter") direct_counter(CounterType.packets_and_bytes) pkt_action_counter;
-    @name(".FlowBlaze.pkt_action") table pkt_action {
-        key = {
-            meta.flowblaze_metadata.pkt_action: ternary @name("FlowBlaze.pkt_action");
-        }
-        actions = {
-            forward;
-            fill_meta_flowlet_id;
-            NoAction;
-        }
-        default_action = NoAction();
-        counters = pkt_action_counter;
-    }
     UpdateLogic() update_logic;
     UpdateState() update_state;
     apply {
         context_lookup.apply();
-        EFSM_table.apply();
         update_logic.apply(hdr, meta.flowblaze_metadata, standard_metadata);
-        pkt_action.apply();
+        EFSM_table.apply();
         update_state.apply(hdr, meta.flowblaze_metadata, standard_metadata);
     }
 }

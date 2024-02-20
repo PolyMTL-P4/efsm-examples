@@ -32,7 +32,6 @@ struct flowblaze_t {
     bit<32> G1;
     bit<32> G2;
     bit<32> G3;
-    bit<8>  pkt_action;
     bit<32> pkt_data; // Data related to packet header or metadata that can be used as operand in an operation
 }
 

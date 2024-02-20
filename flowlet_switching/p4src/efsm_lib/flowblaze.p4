@@ -159,22 +159,19 @@ control FlowBlaze (inout HEADER_NAME hdr,
                  inout METADATA_NAME meta,
                  inout standard_metadata_t standard_metadata){
     // ------------------------ EFSM TABLE -----------------------------
-    @name(".FlowBlaze.define_operation_update_state")
-    action define_operation_update_state(
-                                         bit<8> pkt_action
-                                         ) {
 
-        // Set the packet action to be applied by the main P4 Program,
-        //   in this way the user can define arbitrary action to be applied to packet.
-        meta.flowblaze_metadata.pkt_action = pkt_action;
-    }
+    #ifdef CUSTOM_ACTIONS_DEFINITION
+        CUSTOM_ACTIONS_DEFINITION
+    #endif
 
     @name(".FlowBlaze.EFSM_table_counter")
     direct_counter(CounterType.packets_and_bytes) EFSM_table_counter;
     @name(".FlowBlaze.EFSM_table")
     table EFSM_table {
         actions = {
-            define_operation_update_state;
+            #ifdef CUSTOM_ACTIONS_DECLARATION
+                CUSTOM_ACTIONS_DECLARATION
+            #endif
             NoAction;
         }
         key = {
@@ -224,32 +221,6 @@ control FlowBlaze (inout HEADER_NAME hdr,
     }
     // --------------------------------------------------------------------------
 
-
-    #ifdef CUSTOM_ACTIONS_DEFINITION
-        CUSTOM_ACTIONS_DEFINITION
-    #endif
-
-    @name(".FlowBlaze.pkt_action_counter")
-    direct_counter(CounterType.packets_and_bytes) pkt_action_counter;
-    @name(".FlowBlaze.pkt_action")
-    table pkt_action {
-        key = {
-            // TODO: we can use exact match instead of ternary
-            meta.flowblaze_metadata.pkt_action : ternary @name("FlowBlaze.pkt_action");
-        }
-        actions = {
-            #ifdef CUSTOM_ACTIONS_DECLARATION
-                CUSTOM_ACTIONS_DECLARATION
-            #endif
-            NoAction;
-        }
-        // Keep NoAction as default action
-        default_action = NoAction();
-        counters = pkt_action_counter;
-    }
-    // --------------------------------------------------------------------------
-
-
     UpdateLogic() update_logic;
     UpdateState() update_state;
     apply {
@@ -259,11 +230,8 @@ control FlowBlaze (inout HEADER_NAME hdr,
         #endif
 
         context_lookup.apply();
-
-        EFSM_table.apply();
         update_logic.apply(hdr, meta.flowblaze_metadata, standard_metadata);
-        pkt_action.apply();
-
+        EFSM_table.apply();
         update_state.apply(hdr, meta.flowblaze_metadata, standard_metadata);
     }
 }
