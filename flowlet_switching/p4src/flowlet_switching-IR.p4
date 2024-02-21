@@ -123,10 +123,13 @@ control UpdateLogic(inout headers hdr, inout flowblaze_t flowblaze_metadata, in 
         hash(flowblaze_metadata.update_state_index, HashAlgorithm.crc32, (bit<32>)0, { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.tcp.srcPort, hdr.tcp.dstPort, hdr.ipv4.protocol }, (bit<32>)2014);
         bit<32> t_result = 0;
         if (flowblaze_metadata.state == 0) {
-            t_result = 0 + 0;
+            t_result = 0;
             reg_R0.write(flowblaze_metadata.update_state_index, t_result);
             t_result = (bit<32>)standard_metadata.ingress_global_timestamp + 100000;
             reg_R1.write(flowblaze_metadata.update_state_index, t_result);
+        }
+        if (flowblaze_metadata.state == 0) {
+            reg_state.write(flowblaze_metadata.update_state_index, (bit<16>)1);
         }
         if (flowblaze_metadata.state == 1) {
             t_result = flowblaze_metadata.R0 + 99;
@@ -134,37 +137,18 @@ control UpdateLogic(inout headers hdr, inout flowblaze_t flowblaze_metadata, in 
             t_result = (bit<32>)standard_metadata.ingress_global_timestamp + 100000;
             reg_R1.write(flowblaze_metadata.update_state_index, t_result);
         }
+        if (flowblaze_metadata.state == 1) {
+            if (flowblaze_metadata.R1 >= (bit<32>)standard_metadata.ingress_global_timestamp) {
+                reg_state.write(flowblaze_metadata.update_state_index, (bit<16>)2);
+            }
+        }
         if (flowblaze_metadata.state == 2) {
             t_result = (bit<32>)standard_metadata.ingress_global_timestamp + 100000;
             reg_R1.write(flowblaze_metadata.update_state_index, t_result);
         }
-    }
-}
-
-control UpdateState(inout headers hdr, inout flowblaze_t flowblaze_metadata, in standard_metadata_t standard_metadata) {
-    apply {
-        hash(flowblaze_metadata.update_state_index, HashAlgorithm.crc32, (bit<32>)0, { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr, hdr.tcp.srcPort, hdr.tcp.dstPort, hdr.ipv4.protocol }, (bit<32>)2014);
-        if (flowblaze_metadata.state == 0) {
-            reg_state.write(flowblaze_metadata.update_state_index, (bit<16>)1);
-        }
-        if (flowblaze_metadata.state == 1) {
-            if (flowblaze_metadata.R1 < (bit<32>)standard_metadata.ingress_global_timestamp) {
-                reg_state.write(flowblaze_metadata.update_state_index, (bit<16>)1);
-            }
-        }
-        if (flowblaze_metadata.state == 1) {
-            if (flowblaze_metadata.R1 >= (bit<32>)standard_metadata.ingress_global_timestamp) {
-                reg_state.write(flowblaze_metadata.update_state_index, (bit<16>)2);
-            }
-        }
         if (flowblaze_metadata.state == 2) {
             if (flowblaze_metadata.R1 < (bit<32>)standard_metadata.ingress_global_timestamp) {
                 reg_state.write(flowblaze_metadata.update_state_index, (bit<16>)1);
-            }
-        }
-        if (flowblaze_metadata.state == 2) {
-            if (flowblaze_metadata.R1 >= (bit<32>)standard_metadata.ingress_global_timestamp) {
-                reg_state.write(flowblaze_metadata.update_state_index, (bit<16>)2);
             }
         }
     }
@@ -211,12 +195,10 @@ control FlowBlaze(inout headers hdr, inout metadata meta, inout standard_metadat
         counters = context_lookup_counter;
     }
     UpdateLogic() update_logic;
-    UpdateState() update_state;
     apply {
         context_lookup.apply();
         update_logic.apply(hdr, meta.flowblaze_metadata, standard_metadata);
         EFSM_table.apply();
-        update_state.apply(hdr, meta.flowblaze_metadata, standard_metadata);
     }
 }
 

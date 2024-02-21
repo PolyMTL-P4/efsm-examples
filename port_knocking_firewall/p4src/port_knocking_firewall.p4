@@ -22,9 +22,9 @@
 //    #define CONTEXT_TABLE_SIZE
 ####################################################################################################################
 
-#include "flowblaze_lib/flowblaze_metadata.p4"
+#include "efsm_lib/flowblaze_metadata.p4"
 #include "include/headers.p4"
-#include "flowblaze_lib/flowblaze.p4"
+#include "efsm_lib/flowblaze.p4"
 
 const bit<16> ETH_TYPE_IPV4 = 0x800;
 const bit<16> ETH_TYPE_ARP  = 0x806;

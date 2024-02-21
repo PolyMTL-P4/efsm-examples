@@ -22,7 +22,7 @@
 ################################################## FLOWBLAZE PARAMETERS #############################################
 
 #define FLOW_SCOPE { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }
-#define METADATA_OPERATION_COND (bit<32>) meta.l4Length
+//#define METADATA_OPERATION_COND
 #define CUSTOM_ACTIONS_DEFINITION @name(".FlowBlaze.forward") \
                                   action forward() { \
                                     \
@@ -38,10 +38,10 @@
 //    #define CONTEXT_TABLE_SIZE
 ####################################################################################################################
 
-#include "flowblaze_lib/flowblaze_metadata.p4"
+#include "efsm_lib/flowblaze_metadata.p4"
 #include "include/headers.p4"
 #include "include/metadata.p4"
-#include "flowblaze_lib/flowblaze.p4"
+#include "efsm_lib/flowblaze.p4"
 
 
 const bit<16> ETH_TYPE_IPV4 = 0x800;

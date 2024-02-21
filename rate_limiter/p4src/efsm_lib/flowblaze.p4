@@ -20,7 +20,7 @@
 
 // Useful for using flowblaze.p4 with fabric.p4
 #ifndef FABRIC
-#define METADATA_NAME metadata
+#define METADATA_NAME metadata_t
 #define HEADER_NAME headers
 #endif
 

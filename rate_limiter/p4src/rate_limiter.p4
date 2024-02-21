@@ -38,10 +38,10 @@
 //    #define CONTEXT_TABLE_SIZE
 ####################################################################################################################
 
-#include "flowblaze_lib/flowblaze_metadata.p4"
+#include "efsm_lib/flowblaze_metadata.p4"
 #include "include/headers.p4"
 #include "include/metadata.p4"
-#include "flowblaze_lib/flowblaze.p4"
+#include "efsm_lib/flowblaze.p4"
 
 
 const bit<16> ETH_TYPE_IPV4 = 0x800;
@@ -88,6 +88,10 @@ parser ParserImpl(packet_in packet, out headers hdr, inout metadata_t meta, inou
 
 control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadata_t standard_metadata) {
 
+    action main_forward(bit<9> port) {
+      standard_metadata.egress_spec = port;
+    }
+
     action main_drop() {
       mark_to_drop(standard_metadata);
       exit;
@@ -112,49 +116,35 @@ control ingress(inout headers hdr, inout metadata_t meta, inout standard_metadat
         }
 
         state block {
-            rate = meta;
-            t_lim = now + 1000000;
             drop();
             transition select (t_lim < now) {
-                true: open;
+                true: start;
                 false: block;
             }
         }
     }
 
-    action ipv4_forward(macAddr_t dstAddr, egressSpec_t port) {
-
-        //set the src mac address as the previous dst, this is not correct right?
-        hdr.ethernet.srcAddr = hdr.ethernet.dstAddr;
-
-       //set the destination mac address that we got from the match in the table
-        hdr.ethernet.dstAddr = dstAddr;
-
-        //set the output port that we also get from the table
-        standard_metadata.egress_spec = port;
-
-        //decrease ttl by 1
-        hdr.ipv4.ttl = hdr.ipv4.ttl -1;
-
-    }
-
-    table ipv4_lpm {
+    direct_counter(CounterType.packets_and_bytes) l2_fwd_counter;
+    table t_l2_fwd {
         key = {
-            hdr.ipv4.dstAddr: lpm;
+            standard_metadata.ingress_port : ternary;
+            hdr.ethernet.dstAddr           : ternary;
+            hdr.ethernet.srcAddr           : ternary;
+            hdr.ethernet.etherType         : ternary;
         }
         actions = {
-            ipv4_forward;
+            main_forward;
             main_drop;
             NoAction;
         }
-        size = 1024;
         default_action = NoAction();
+        counters = l2_fwd_counter;
     }
 
     apply {
         if (hdr.ethernet.isValid()) {
             FlowBlaze.apply(hdr, meta, standard_metadata);
-            ipv4_lpm.apply();
+            t_l2_fwd.apply();
         }
     }
 }
