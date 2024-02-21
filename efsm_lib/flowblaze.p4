@@ -142,7 +142,6 @@ control FlowBlaze (inout HEADER_NAME hdr,
     // --------------------------------------------------------------------------
 
     UpdateLogic() update_logic;
-    UpdateState() update_state;
     apply {
         #ifdef METADATA_OPERATION_COND
             // FIXME: is cast really necessary?
