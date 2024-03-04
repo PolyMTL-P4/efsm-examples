@@ -1,0 +1,4 @@
+table_add FlowBlaze.EFSM_table drop 0&&&0xFFFF  =>  10
+table_add FlowBlaze.EFSM_table drop 1&&&0xFFFF  =>  10
+table_add FlowBlaze.EFSM_table forward 2&&&0xFFFF  =>  10
+
