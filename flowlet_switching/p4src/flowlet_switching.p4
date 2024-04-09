@@ -22,10 +22,10 @@
 
 
 //My includes
-#include "efsm_lib/flowblaze_metadata.p4"
+#include "flowblaze_lib/flowblaze_metadata.p4"
 #include "include/headers.p4"
 #include "include/parsers.p4"
-#include "efsm_lib/flowblaze.p4"
+#include "flowblaze_lib/flowblaze.p4"
 
 /*************************************************************************
 ************   C H E C K S U M    V E R I F I C A T I O N   *************

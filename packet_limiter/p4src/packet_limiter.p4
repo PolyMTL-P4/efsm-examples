@@ -22,7 +22,6 @@
 ################################################## FLOWBLAZE PARAMETERS #############################################
 
 #define FLOW_SCOPE { hdr.ipv4.srcAddr, hdr.ipv4.dstAddr }
-#define METADATA_OPERATION_COND (bit<32>) meta.l4Length
 #define CUSTOM_ACTIONS_DEFINITION @name(".FlowBlaze.forward") \
                                   action forward() { \
                                     \
@@ -36,6 +35,7 @@
 // Configuration parameter left black because not needed
 //    #define EFSM_MATCH_FIELDS
 //    #define CONTEXT_TABLE_SIZE
+//    #define METADATA_OPERATION_COND
 ####################################################################################################################
 
 #include "flowblaze_lib/flowblaze_metadata.p4"
