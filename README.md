@@ -4,6 +4,10 @@ Specific instructions can be found in examples' READMEs.
 
 This is a guide which explains how to use the proposed P4 extensions.
 
+The branch [flowblaze-efsm](https://github.com/PolyMTL-P4/efsm-examples/tree/flowblaze-efsm) corresponds to the [same branch name in p4c-f4](https://github.com/PolyMTL-P4/p4c-f4/tree/flowblaze-efsm). This branch contains the code that is close to FlowBlaze.p4 and used in the paper *Enhancing P4 Syntax to Support Extended Finite State Machines as Native Stateful Objects*.
+
+The branch [efsm-change-flowblaze](https://github.com/PolyMTL-P4/efsm-examples/tree/efsm-change-flowblaze) corresponds to the [same branch name in p4c-f4](https://github.com/PolyMTL-P4/p4c-f4/tree/efsm-change-flowblaze). This branch contains a version which generates P4 code to bypass FlowBlaze.p4.
+
 ### Compiling modified p4c
 
 ```bash
@@ -30,13 +34,11 @@ cd efsm-examples/flowlet_switching/p4src
 
 The parameter `--std f4` tells the compiler to use the compiler passes found in the p4c-f4/frontends/p4/fromF4/converters.cpp file and thus apply the conversion of the new structures.
 
-This command generates a new P4 program `*-IR.p4` and table fill commands in the case of FlowBlaze.p4 backend.
+This command generates a new P4 program `*-IR.p4` and table fill commands in `flowblaze-table-commands.txt`
 
-In the future it would be interesting to directly compile the program directly for the BMv2 if the backend is compatible using the `p4c` command and not `p4test`.
+In the future it would be interesting to compile the program directly for the BMv2 if the backend is compatible using the `p4c` command and not `p4test`.
 
-The output of the compiler can be used for example in the p4-utils VM environment to test that the program is functional.
-
-We should provide examples with all the configuration to test properly the output of the compiler.
+The output of the compiler can be used in the p4-utils VM environment to test that the program is functional.
 
 ### Testing
 
@@ -132,7 +134,7 @@ efsm MyEFSM(in headers hdr,
 ```
 
 
-This example can be included in a control block in a P4 program, and then it should be called (not yet implemented). Instead for now, the FlowBlaze main block is called.
+This example can be included in a control block in a P4 program, and then it should be called (not yet implemented). For now, the FlowBlaze main block is called.
 
 
 #### Using the efsm
