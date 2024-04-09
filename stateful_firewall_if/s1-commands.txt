@@ -1,0 +1,9 @@
+table_set_default ipv4_lpm main_drop
+table_add ipv4_lpm ipv4_forward 10.0.1.1/32 => 00:00:0a:00:01:01 1
+table_add ipv4_lpm ipv4_forward 10.0.2.0/24 => 00:00:00:03:01:00 2
+
+table_add FlowBlaze.EFSM_table drop 0&&&0xFFFF  =>  10
+table_add FlowBlaze.EFSM_table drop 1&&&0xFFFF  =>  10
+table_add FlowBlaze.EFSM_table forward 2&&&0xFFFF  =>  10
+
+

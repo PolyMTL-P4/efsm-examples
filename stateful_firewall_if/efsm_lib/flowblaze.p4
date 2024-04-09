@@ -95,7 +95,7 @@ control FlowBlaze (inout HEADER_NAME hdr,
             NoAction;
         }
         key = {
-            meta.flowblaze_metadata.pkt_action                : ternary @name("FlowBlaze.pkt_action");
+            meta.flowblaze_metadata.state                : ternary @name("FlowBlaze.state");
         }
         default_action = NoAction;
         counters = EFSM_table_counter;
