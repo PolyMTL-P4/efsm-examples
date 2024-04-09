@@ -8,9 +8,10 @@ This is a guide which explains how to use the proposed P4 extensions.
 
 ```bash
 cd
+git clone https://github.com/PolyMTL-P4/efsm-examples.git
 git clone --recursive https://github.com/PolyMTL-P4/p4c-f4.git
 cd p4c-f4
-git checkout flowblaze-efsm
+git switch flowblaze-efsm
 
 mkdir build
 cd build
@@ -24,12 +25,10 @@ To compile a program containing the proposed extensions, the command used is:
 
 ```bash
 cd efsm-examples/flowlet_switching/p4src
-../../../p4c-f4/build/p4test --std f4 --efsm fb flowlet_switching.p4
+../../../p4c-f4/build/p4test --std f4 flowlet_switching.p4
 ```
 
-The parameter `--std f4` tells the compiler to use the converters.cpp file and thus apply the conversion of the new structures.
-
-The parameter `--efsm fb` specifies the backend used to convert the `efsm` structure. Indeed, the modular design of the compiler allows the creation of other backends than FlowBlaze.p4, for example for other targets than the BMv2.
+The parameter `--std f4` tells the compiler to use the compiler passes found in the p4c-f4/frontends/p4/fromF4/converters.cpp file and thus apply the conversion of the new structures.
 
 This command generates a new P4 program `*-IR.p4` and table fill commands in the case of FlowBlaze.p4 backend.
 
@@ -43,7 +42,7 @@ We should provide examples with all the configuration to test properly the outpu
 
 To test the compiler output, the VM from [p4-utils](https://github.com/nsg-ethz/p4-utils) can be used. We have to provide the *-IR.p4 file and table fill commands to make it work properly.
 
-#### Disabling Debugging in the bmv2 Switch
+#### Disabling Debugging in the bmv2 Switch (taken from https://github.com/nsg-ethz/p4-utils)
 As you have already seen in the previous exercises, if you do an `iperf`
 between two directly connected hosts you get roughly a bandwidth of `~5mbps`.
 In order to be able to send packets fast to the switch we can clone the
@@ -76,7 +75,7 @@ Thus by running `sudo make install` in `~/p4-tools/bmv2` or `~/p4-tools/bmv2-opt
 
 ---
 
-There are two functional extensions: p4class and FlowBlaze.p4 EFSM.
+There are two functional extensions in our modified p4c compiler: p4class and FlowBlaze.p4 EFSM.
 
 ### p4class
 
@@ -85,6 +84,8 @@ The p4class is a system of code templating. You create a p4class which depends o
 Then the constructor of the p4class can be called with parameters, and it generates specific code.
 
 The goal of the p4class is to factorize code in a P4 program, because a P4 program is often made of very repetitive parts.
+
+That was more of an exercise to start tinkering with the p4c compiler, so it is not very very useful and mature, and we focus on the second part:
 
 
 ### efsm
@@ -131,7 +132,7 @@ efsm MyEFSM(in headers hdr,
 ```
 
 
-This example can be included in a control block in a P4 program, and then it should be called (not yet implemented).
+This example can be included in a control block in a P4 program, and then it should be called (not yet implemented). Instead for now, the FlowBlaze main block is called.
 
 
 #### Using the efsm
@@ -186,3 +187,7 @@ control MyIngress(inout headers hdr, inout metadata_t meta, inout standard_metad
     }
 }
 ```
+# Notes
+
+This has been removed in the commit https://github.com/PolyMTL-P4/p4c-f4/commit/ed0361298e88a907e2be305c59ccb8902c1e32d6 but it may be useful in the future:
+The parameter `--efsm fb` specifies the backend used to convert the `efsm` structure. Indeed, the modular design of the compiler allows the creation of other backends than FlowBlaze.p4, for example for other targets than the BMv2. 
