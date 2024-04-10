@@ -189,6 +189,39 @@ control MyIngress(inout headers hdr, inout metadata_t meta, inout standard_metad
     }
 }
 ```
+
+# p4c
+
+So our modified p4c code is in this repo https://github.com/PolyMTL-P4/p4c-f4/tree/flowblaze-efsm
+
+The documentation we used was mainly [this document](https://github.com/p4lang/p4c/blob/main/docs/compiler-design.pdf) and generally development documentation of p4c [here](https://github.com/p4lang/p4c?tab=readme-ov-file#p4-compiler-onboarding)
+
+The main modification was the creation of a compiler pass which is invoked before any other compilation pass and consumes the efsm representation in the IR. Then the code is converted back to P4 and reparsed to avoid inconsistencies in the IR after having removed the EFSM representation.
+
+Here is the list of the modified files in p4c:
+
+```
+.gitignore
+frontends/CMakeLists.txt
+frontends/common/parseInput.cpp
+frontends/common/parseInput.h
+frontends/common/parser_options.cpp
+frontends/common/parser_options.h
+frontends/p4/fromF4/converters.cpp
+frontends/p4/fromF4/converters.h
+frontends/parsers/p4/p4lexer.ll
+frontends/parsers/p4/p4parser.ypp
+ir/CMakeLists.txt
+ir/base.def
+ir/dbprint-p4.cpp
+ir/efsm.cpp
+ir/efsm.def
+ir/expression.def
+ir/ir.cpp
+ir/ir.def
+```
+
+
 # Notes
 
 This has been removed in the commit https://github.com/PolyMTL-P4/p4c-f4/commit/ed0361298e88a907e2be305c59ccb8902c1e32d6 but it may be useful in the future:
