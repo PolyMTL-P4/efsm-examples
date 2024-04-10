@@ -221,6 +221,18 @@ ir/ir.cpp
 ir/ir.def
 ```
 
+You can get the changes that were added with the command: `git diff 383a2d36f71bc3f2fafac3c632212a6f69e9bd58 HEAD` on the branch `flowblaze-efsm`.
+
+The main pass is called `EfsmToFlowBlaze`. It follows the structure of the FlowBlaze.p4 code, but in C++. The version in the `efsm-change-flowblaze` generates code directly, it is an “upgraded” version of `flowblaze-efsm`.
+
+## Flowblaze.p4 version ([flowblaze-efsm](https://github.com/PolyMTL-P4/p4c-f4/tree/flowblaze-efsm))
+
+This version generates commands to fill table just as flowblaze.p4 does, with a slightly adapted flowblaze.p4 file.
+
+## Code generation version ([efsm-change-flowblaze](https://github.com/PolyMTL-P4/p4c-f4/tree/efsm-change-flowblaze))
+
+This version generates two files, `efsm-lib-content.p4` and `flowblaze-table-commands.txt`. `esfm-lib-content.p4` should go in the `efsm_lib` folder. Then the examples are supposed to be executed in a [p4-utils](https://github.com/nsg-ethz/p4-utils) environment with the command `sudo p4run`.
+
 
 # Notes
 
